@@ -1,5 +1,5 @@
 import { useDispatch } from 'react-redux';
-import { addFilter } from 'redux/filterSlice';
+import { setFilter } from 'redux/filterSlice';
 
 import { FilterText, FilterInput } from './Filter.styled';
 
@@ -9,7 +9,7 @@ export const Filter = () => {
   const handleChange = e => {
     e.preventDefault();
     const name = e.target.value;
-    dispatch(addFilter(name));
+    dispatch(setFilter(name));
   };
 
   return (

@@ -2,8 +2,8 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
-import { addContact } from 'redux/contactsSlice';
-import { getContacts } from 'redux/selectors';
+import { addContact } from 'redux/operations';
+import { selectContacts } from 'redux/selectors';
 
 import {
   ContainerForm,
@@ -21,7 +21,7 @@ const RecipeSchema = Yup.object().shape({
       excludeEmptyString: true,
     })
     .required('Required'),
-  number: Yup.string()
+  phone: Yup.string()
     .matches(
       /\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}/,
       {
@@ -35,29 +35,33 @@ const RecipeSchema = Yup.object().shape({
 
 export const ContactForm = () => {
   const dispatch = useDispatch();
-  const contacts = useSelector(getContacts);
+  const contacts = useSelector(selectContacts);
+
+  const initialValues = {
+    name: '',
+    phone: '',
+  };
 
   const handleSubmit = (values, actions) => {
-    let newContact = values;
-    const { name, number } = newContact;
-    actions.resetForm({
-      name: '',
-      number: '',
-    });
-    if (contacts.value.some(contact => contact.name === name)) {
-      alert(`${name} is already in contacts`);
-      return false;
+    const addedContacts = contacts.filter(
+      contact => contact.name.toLowerCase() === values.name.toLowerCase()
+    );
+
+    if (addedContacts.length) {
+      alert(`${values.name} is already in contacts`);
+    } else {
+      dispatch(addContact(values));
+      console.log(values);
+      actions.resetForm({
+        name: '',
+        phone: '',
+      });
     }
-    dispatch(addContact(name, number));
-    return true;
   };
 
   return (
     <Formik
-      initialValues={{
-        name: '',
-        number: '',
-      }}
+      initialValues={initialValues}
       validationSchema={RecipeSchema}
       onSubmit={(values, actions) => {
         handleSubmit(values, actions);
@@ -71,8 +75,8 @@ export const ContactForm = () => {
         </Label>
         <Label>
           Number
-          <Input type="tel" name="number" />
-          <ErrorForm name="number" component="span" />
+          <Input type="tel" name="phone" />
+          <ErrorForm name="phone" component="span" />
         </Label>
 
         <FormBtn type="submit">Add contact</FormBtn>
